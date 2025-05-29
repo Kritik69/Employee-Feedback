@@ -64,16 +64,16 @@ export default function AdminDashboard() {
   }, [router]);
 
   const { data: feedbackList, error } = useSWR(
-    `http://localhost:5000/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`,
+    `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`,
     fetcher
   );
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:5000');
+    const socketInstance = io('https://employee-feedback-server-315893334095.europe-west1.run.app');
     setSocket(socketInstance);
 
     socketInstance.on('newFeedback', () => {
-      mutate(`http://localhost:5000/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     });
 
     return () => socketInstance.disconnect();
@@ -96,11 +96,11 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.patch(
-        `http://localhost:5000/api/feedback/${id}/reviewed`,
+        `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback/${id}/reviewed`,
         { reviewed: !currentStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      mutate(`http://localhost:5000/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     } catch (error) {
       if (error.response?.status === 401) {
         router.push('/login');
@@ -112,10 +112,10 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.delete(
-        `http://localhost:5000/api/feedback/${id}`,
+        `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      mutate(`http://localhost:5000/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     } catch (error) {
       if (error.response?.status === 401) {
         router.push('/login');

@@ -30,7 +30,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://employee-feedback-server-315893334095.europe-west1.run.app/api/auth/login', {
         email,
         password,
       });

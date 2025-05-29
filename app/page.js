@@ -33,7 +33,7 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/feedback', {
+      await axios.post('https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback', {
         text: feedback,
         category
       });
