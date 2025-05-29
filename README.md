@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Employee Feedback Portal
 
-## Getting Started
+A full-stack web application for collecting and managing employee feedback.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Employee Portal
+- Anonymous feedback submission
+- Category selection (Work Environment, Leadership, Growth, Others)
+- Real-time feedback submission
+- Success notifications
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Admin Dashboard
+- View all feedback entries
+- Filter feedback by category
+- Mark feedback as reviewed
+- Delete feedback entries
+- Real-time updates using WebSocket
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Frontend
+- Next.js (JavaScript)
+- Material UI
+- SWR for data fetching
+- Socket.io-client for real-time updates
+- Axios for API calls
 
-## Learn More
+### Backend
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- Socket.io for real-time updates
+- CORS for cross-origin requests
 
-To learn more about Next.js, take a look at the following resources:
+## Setup Instructions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local instance running on default port 27017)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-## Deploy on Vercel
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Create a .env file in the backend directory with the following content:
+   ```
+   MONGODB_URI=mongodb://localhost:27017/employee-feedback
+   PORT=5000
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Start the server:
+   ```bash
+   npm run dev
+   ```
+
+### Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Access the application:
+   - Employee Portal: http://localhost:3000
+   - Admin Dashboard: http://localhost:3000/admin
+
+## API Documentation
+
+### Endpoints
+
+#### POST /api/feedback
+Submit new feedback
+- Body: `{ text: string, category: string }`
+- Response: Created feedback object
+
+#### GET /api/feedback
+Get all feedback entries
+- Query params: `category` (optional)
+- Response: Array of feedback objects
+
+#### PATCH /api/feedback/:id/reviewed
+Update feedback review status
+- Params: `id` (feedback ID)
+- Body: `{ reviewed: boolean }`
+- Response: Updated feedback object
+
+#### DELETE /api/feedback/:id
+Delete feedback entry
+- Params: `id` (feedback ID)
+- Response: Success message
+
+### WebSocket Events
+- `newFeedback`: Emitted when new feedback is submitted
+- `feedbackUpdated`: Emitted when feedback review status is updated
+- `feedbackDeleted`: Emitted when feedback is deleted
+
+## Assumptions and Implementation Notes
+
+1. No authentication required for simplicity
+2. Using local MongoDB instance
+3. Real-time updates implemented using Socket.io
+4. Responsive design for all screen sizes
+5. Form validation on both frontend and backend
+6. Error handling and user notifications
+7. Optimistic UI updates using SWR 

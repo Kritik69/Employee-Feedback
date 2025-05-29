@@ -1,47 +1,46 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Container,
   Paper,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Typography,
   Box,
-  Snackbar,
   Alert,
-  Fab,
+  CircularProgress,
   useTheme,
+  Fab,
 } from '@mui/material';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import axios from 'axios';
 
-const categories = ['Work Environment', 'Leadership', 'Growth', 'Others'];
-
-export default function Home() {
+export default function Login() {
+  const router = useRouter();
   const theme = useTheme();
-  const [feedback, setFeedback] = useState('');
-  const [category, setCategory] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/feedback', {
-        text: feedback,
-        category
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
       });
-      setFeedback('');
-      setCategory('');
-      setShowSuccess(true);
+
+      localStorage.setItem('adminToken', response.data.token);
+      router.push('/admin');
     } catch (err) {
-      setError('Failed to submit feedback. Please try again.');
+      setError('Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +57,9 @@ export default function Home() {
       sx={{ 
         py: 4,
         minHeight: '100vh',
-        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}
     >
       <Box sx={{ position: 'fixed', top: 16, right: 16 }}>
@@ -75,6 +76,9 @@ export default function Home() {
         elevation={3} 
         sx={{ 
           p: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -103,31 +107,31 @@ export default function Home() {
             WebkitTextFillColor: theme.palette.mode === 'dark' ? 'transparent' : 'inherit',
           }}
         >
-          Employee Feedback
+          Admin Login
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={category}
-              label="Category"
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            >
-              {categories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <TextField
             fullWidth
-            multiline
-            rows={4}
-            label="Your Feedback"
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
             sx={{ 
               mb: 3,
@@ -138,36 +142,54 @@ export default function Home() {
               },
             }}
           />
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 2,
+                animation: 'slideIn 0.3s ease-out',
+                '@keyframes slideIn': {
+                  from: {
+                    opacity: 0,
+                    transform: 'translateY(-10px)',
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: 'translateY(0)',
+                  },
+                },
+              }}
+            >
+              {error}
+            </Alert>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Button
               type="submit"
               variant="contained"
               color="primary"
               size="large"
+              disabled={loading}
               sx={{
                 minWidth: 200,
                 height: 48,
+                position: 'relative',
               }}
             >
-              Submit Feedback
+              {loading ? (
+                <CircularProgress 
+                  size={24} 
+                  sx={{
+                    color: theme.palette.primary.main,
+                  }}
+                />
+              ) : (
+                'Login'
+              )}
             </Button>
           </Box>
         </form>
       </Paper>
-      <Snackbar
-        open={showSuccess}
-        autoHideDuration={6000}
-        onClose={() => setShowSuccess(false)}
-      >
-        <Alert severity="success">Thank you for your feedback!</Alert>
-      </Snackbar>
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError('')}
-      >
-        <Alert severity="error">{error}</Alert>
-      </Snackbar>
     </Container>
   );
-}
+} 
