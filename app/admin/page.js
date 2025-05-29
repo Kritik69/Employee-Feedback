@@ -35,6 +35,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import useSWR, { mutate } from 'swr';
+import { API_URL, SOCKET_URL } from '../config';
 
 const categories = ['All', 'Work Environment', 'Leadership', 'Growth', 'Others'];
 
@@ -63,21 +64,21 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  const { data: feedbackList, error } = useSWR(
-    `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`,
+  const { data: feedbackList, error, mutate } = useSWR(
+    `${API_URL}/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`,
     fetcher
   );
 
   useEffect(() => {
-    const socketInstance = io('https://employee-feedback-server-315893334095.europe-west1.run.app');
+    const socketInstance = io(SOCKET_URL);
     setSocket(socketInstance);
 
     socketInstance.on('newFeedback', () => {
-      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`${API_URL}/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     });
 
     return () => socketInstance.disconnect();
-  }, [selectedCategory]);
+  }, [mutate, selectedCategory]);
 
   const handleCategoryChange = (event, newCategory) => {
     if (newCategory !== null) {
@@ -92,19 +93,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleReviewedToggle = async (id, currentStatus) => {
+  const handleReviewToggle = async (id, currentStatus) => {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.patch(
-        `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback/${id}/reviewed`,
+        `${API_URL}/api/feedback/${id}/reviewed`,
         { reviewed: !currentStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`${API_URL}/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     } catch (error) {
-      if (error.response?.status === 401) {
-        router.push('/login');
-      }
+      console.error('Error toggling review status:', error);
     }
   };
 
@@ -112,14 +111,12 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.delete(
-        `https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback/${id}`,
+        `${API_URL}/api/feedback/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      mutate(`https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
+      mutate(`${API_URL}/api/feedback${selectedCategory !== 'All' ? `?category=${selectedCategory}` : ''}`);
     } catch (error) {
-      if (error.response?.status === 401) {
-        router.push('/login');
-      }
+      console.error('Error deleting feedback:', error);
     }
   };
 
@@ -186,7 +183,7 @@ export default function AdminDashboard() {
             <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
               <Switch
                 checked={feedback.reviewed}
-                onChange={() => handleReviewedToggle(feedback._id, feedback.reviewed)}
+                onChange={() => handleReviewToggle(feedback._id, feedback.reviewed)}
                 color="primary"
               />
               <IconButton
@@ -238,7 +235,7 @@ export default function AdminDashboard() {
               <TableCell align="center">
                 <Switch
                   checked={feedback.reviewed}
-                  onChange={() => handleReviewedToggle(feedback._id, feedback.reviewed)}
+                  onChange={() => handleReviewToggle(feedback._id, feedback.reviewed)}
                   color="primary"
                 />
               </TableCell>

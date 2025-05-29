@@ -20,6 +20,7 @@ import {
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import axios from 'axios';
+import { API_URL } from './config';
 
 const categories = ['Work Environment', 'Leadership', 'Growth', 'Others'];
 
@@ -29,11 +30,13 @@ export default function Home() {
   const [category, setCategory] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
-      await axios.post('https://employee-feedback-server-315893334095.europe-west1.run.app/api/feedback', {
+      await axios.post(`${API_URL}/api/feedback`, {
         text: feedback,
         category
       });
