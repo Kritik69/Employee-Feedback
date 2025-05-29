@@ -35,16 +35,31 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    setError('');
+    
     try {
+      if (!feedback.trim()) {
+        setError('Feedback text is required');
+        return;
+      }
+      
+      if (!category) {
+        setError('Please select a category');
+        return;
+      }
+
       await axios.post(`${API_URL}/api/feedback`, {
-        text: feedback,
+        text: feedback.trim(),
         category
       });
+
       setFeedback('');
       setCategory('');
       setShowSuccess(true);
     } catch (err) {
-      setError('Failed to submit feedback. Please try again.');
+      setError(err.response?.data?.error || 'Failed to submit feedback. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
